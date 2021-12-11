@@ -30,7 +30,7 @@ class MainClass
             var key = Console.ReadLine();
 
             int[,] sortedarray = unsortedarray;
-
+            Console.ForegroundColor = ConsoleColor.Yellow;
             switch (key)
             {
                 case "1":
@@ -45,6 +45,7 @@ class MainClass
                     Console.WriteLine("Массив не отсортирован");
                     break;
             }
+            Console.ForegroundColor = ConsoleColor.White;
             PrintArray(sortedarray);
         }
 
@@ -55,7 +56,9 @@ class MainClass
             bool key = true;
             int value;
 
-            Console.WriteLine("Введите значения строки массива");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Введите значения");
+            Console.ForegroundColor = ConsoleColor.White;
 
             (int cursorx, int cursory) = Console.GetCursorPosition();
             for (int i = 0; i < Rows; ++i)
@@ -87,40 +90,57 @@ class MainClass
                 cursory += 3;
                 cursorx = 0;
             }
+            Console.WriteLine();    
             return array;
         }
 
         //Сортирует
-        static int[,] SortArray(int[,] array, bool compmeth)
+        static int[,] SortArray(int[,] unsortedarray, bool compmeth = true)
         {
-            int rows = array.GetUpperBound(0) + 1;
-            int cols = array.GetUpperBound(1) + 1;
+            int rows = unsortedarray.GetUpperBound(0) + 1;
+            int cols = unsortedarray.GetUpperBound(1) + 1;
             int temp;
 
             for (int i = 0; i < rows; ++i)
                 for (int j = 0; j < cols; ++j)
                     for (int k = j; k < cols; ++k)
                     {
-                        if ((compmeth && array[i, j] < array[i, k]) | (!compmeth && array[i, j] > array[i, k]))
+                        if ((compmeth && unsortedarray[i, j] < unsortedarray[i, k]) | (!compmeth && unsortedarray[i, j] > unsortedarray[i, k]))
                         {
-                            temp = array[i, j];
-                            array[i, j] = array[i, k];
-                            array[i, k] = temp;
+                            temp = unsortedarray[i, j];
+                            unsortedarray[i, j] = unsortedarray[i, k];
+                            unsortedarray[i, k] = temp;
                         }
 
                     }
-            return array;
+            return unsortedarray;
         }
         //Печатает массив
         static void PrintArray(int[,] array)
-        {
+        { 
+            (int cursorx, int cursory) = Console.GetCursorPosition();
+            Console.WriteLine();
             for (int i = 0; i < array.GetUpperBound(0) + 1; ++i)
             {
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.Write("R{0}:", i);
+                Console.ForegroundColor = ConsoleColor.White;
                 for (int j = 0; j < array.GetUpperBound(1) + 1; ++j)
+                {
+                    if (i == 0)
+                    {
+                        (cursorx, cursory) = Console.GetCursorPosition();
+                        Console.SetCursorPosition(cursorx, cursory - 1);
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.Write("\tC{0}", j);
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.SetCursorPosition(cursorx, cursory);
+                    }
                     Console.Write("\t{0}", array[i, j]);
+                }
                 Console.WriteLine();
             }
+            Console.WriteLine();
         }
 
         Console.ReadKey();
