@@ -11,14 +11,13 @@ int[,] Array = new int[rows, collumns];
 
 Array = GetArray(rows, collumns);
 
-PrintArray(Array);
-
 WantSort(Array);
 WantSort(Array);
 WantSort(Array);
 
 PrintArray(Array);
 
+//Спрашивает отсортировать и если да, то как
 static void WantSort(int[,] array)
 {
     Console.Write("Хотите отсортировать? \n1-по убыванию \n2-по возрастанию \nиначе-не сортировать \n");
@@ -41,6 +40,7 @@ static void WantSort(int[,] array)
     }
     PrintArray(array);
 }
+
 //Организует ввод двухмерного массива
 static int[,] GetArray(int Rows,int Collumns)
     {
