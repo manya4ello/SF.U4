@@ -4,7 +4,7 @@ class MainClass
 {
     public static void Main(string[] args)
     {
-        int rows = 0;
+       /* int rows = 0;
         int collumns = 0;
         Console.WriteLine("Введите колличество строк в массиве:");
         rows = int.Parse(Console.ReadLine());
@@ -13,17 +13,22 @@ class MainClass
 
         int[,] Array = new int[rows, collumns];
 
-        Array = GetArray(rows, collumns);
+       Array = GetArray(rows, collumns); */
+       int [,] Array = { { 1, 2, 3, 4,}, { 7,6,5,2} };
 
-        WantSort(Array);
+        Console.WriteLine("Оригинальный массив:\n");
+        PrintArray(Array);
+
+
         WantSort(Array);
         WantSort(Array);
 
         Console.WriteLine("Оригинальный массив:\n");
         PrintArray(Array);
 
+
         //Спрашивает отсортировать и если да, то как
-        static void WantSort(int[,] unsortedarray)
+        static void WantSort(in int[,] unsortedarray)
         {
             Console.Write("Хотите отсортировать? \n1-по убыванию \n2-по возрастанию \nиначе-не сортировать \n");
 
@@ -35,18 +40,20 @@ class MainClass
             {
                 case "1":
                     Console.WriteLine("Массив отсортирован по убыванию");
-                    sortedarray = SortArray(unsortedarray, true);
+                    SortArray(unsortedarray, out sortedarray, true);
+                    PrintArray(sortedarray);
                     break;
                 case "2":
                     Console.WriteLine("Массив отсортирован по возрастанию");
-                    sortedarray = SortArray(unsortedarray, false);
+                    SortArray(unsortedarray, out sortedarray, false);
+                    PrintArray(sortedarray);
                     break;
                 default:
                     Console.WriteLine("Массив не отсортирован");
                     break;
             }
             Console.ForegroundColor = ConsoleColor.White;
-            PrintArray(sortedarray);
+           
         }
 
         //Организует ввод двухмерного массива
@@ -95,28 +102,31 @@ class MainClass
         }
 
         //Сортирует
-        static int[,] SortArray(int[,] unsortedarray, bool compmeth = true)
+        static void SortArray(in int[,] unsortedarray, out int[,] SortedArray, bool compmeth = true)
         {
+            Console.WriteLine("Получил");
+            PrintArray(unsortedarray);
+
             int rows = unsortedarray.GetUpperBound(0) + 1;
             int cols = unsortedarray.GetUpperBound(1) + 1;
             int temp;
-
+            SortedArray = unsortedarray;
             for (int i = 0; i < rows; ++i)
                 for (int j = 0; j < cols; ++j)
                     for (int k = j; k < cols; ++k)
                     {
-                        if ((compmeth && unsortedarray[i, j] < unsortedarray[i, k]) | (!compmeth && unsortedarray[i, j] > unsortedarray[i, k]))
+                        if ((compmeth && SortedArray[i, j] < SortedArray[i, k]) | (!compmeth && SortedArray[i, j] > SortedArray[i, k]))
                         {
                             temp = unsortedarray[i, j];
-                            unsortedarray[i, j] = unsortedarray[i, k];
-                            unsortedarray[i, k] = temp;
+                            SortedArray[i, j] = SortedArray[i, k];
+                            SortedArray[i, k] = temp;
                         }
 
                     }
-            return unsortedarray;
         }
+        
         //Печатает массив
-        static void PrintArray(int[,] array)
+        static void PrintArray(in int[,] array)
         { 
             (int cursorx, int cursory) = Console.GetCursorPosition();
             Console.WriteLine();
