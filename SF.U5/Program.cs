@@ -4,7 +4,7 @@ class MainClass
 {
     public static void Main(string[] args)
     {
-       /* int rows = 0;
+       int rows = 0;
         int collumns = 0;
         Console.WriteLine("Введите колличество строк в массиве:");
         rows = int.Parse(Console.ReadLine());
@@ -13,19 +13,13 @@ class MainClass
 
         int[,] Array = new int[rows, collumns];
 
-       Array = GetArray(rows, collumns); */
-       int [,] Array = { { 1, 2, 3, 4,}, { 7,6,5,2} };
+       Array = GetArray(rows, collumns); 
+      
+        //int [,] Array = { { 1, 2, 3, 4,}, { 7,6,5,2} };
 
-        Console.WriteLine("Оригинальный массив:\n");
-        PrintArray(Array);
-
-
+       
         WantSort(Array);
-        WantSort(Array);
-
-        Console.WriteLine("Оригинальный массив:\n");
-        PrintArray(Array);
-
+                      
 
         //Спрашивает отсортировать и если да, то как
         static void WantSort(in int[,] unsortedarray)
@@ -53,7 +47,9 @@ class MainClass
                     break;
             }
             Console.ForegroundColor = ConsoleColor.White;
-           
+            
+            if (key == "1" | key == "2")
+                WantSort(unsortedarray);
         }
 
         //Организует ввод двухмерного массива
@@ -104,9 +100,7 @@ class MainClass
         //Сортирует
         static void SortArray(in int[,] unsortedarray, out int[,] SortedArray, bool compmeth = true)
         {
-            Console.WriteLine("Получил");
-            PrintArray(unsortedarray);
-
+           
             int rows = unsortedarray.GetUpperBound(0) + 1;
             int cols = unsortedarray.GetUpperBound(1) + 1;
             int temp;
