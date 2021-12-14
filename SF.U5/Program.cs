@@ -110,6 +110,7 @@ class MainClass
             int rows = unsortedarray.GetUpperBound(0) + 1;
             int cols = unsortedarray.GetUpperBound(1) + 1;
             int temp;
+            SortedArray = new int[rows,cols];
             SortedArray = unsortedarray;
             for (int i = 0; i < rows; ++i)
                 for (int j = 0; j < cols; ++j)
