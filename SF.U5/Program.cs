@@ -21,7 +21,7 @@ class MainClass
         WantSort(Array);
                       
 
-        //Спрашивает отсортировать и если да, то как
+        ///Спрашивает отсортировать и если да, то как
         static void WantSort(in int[,] unsortedarray)
         {
             Console.Write("Хотите отсортировать? \n1-по убыванию \n2-по возрастанию \nиначе-не сортировать \n");

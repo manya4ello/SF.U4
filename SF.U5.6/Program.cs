@@ -1,4 +1,4 @@
-﻿// Задание 5.6 
+﻿/// Задание 5.6 
 
 using System;
 
@@ -29,10 +29,10 @@ class MainClass
             return User;
         }
 
-        //Проверка ввода Имени/Фамилии. Проверяет, что не цифра и не ""
+        ///Проверка ввода Имени/Фамилии. Проверяет, что не цифра и не ""
         static string GetName ()
         {
-            string inputstr = "";
+            string inputstr = String.Empty;
             bool check;
             int check2;
             (int x, int y) = Console.GetCursorPosition();
@@ -40,7 +40,7 @@ class MainClass
             {
                Console.SetCursorPosition(x, y); 
                 inputstr = Console.ReadLine ();
-                check = int.TryParse(inputstr, out check2) | (inputstr == "");
+                check = int.TryParse(inputstr, out check2) | (string.IsNullOrWhiteSpace(inputstr));
                 
             }
             while (check);
@@ -48,7 +48,7 @@ class MainClass
             return inputstr;
         }
 
-        //Проверка ввода возраста. Проверяет, что цифра в диапазоне 1-100
+        ///Проверка ввода возраста. Проверяет, что цифра в диапазоне 1-100
         static int GetAge()
         {
             string inputstr = "";
@@ -72,12 +72,12 @@ class MainClass
             return age;
         }
 
-        //Ввод животных
+        ///Ввод животных
         static string[] GetPet()
         {
             string[] pets;
             Console.Write("У Вас есть домашние питомцы? (д/н): ");
-            string inputstr = "";
+            string inputstr = String.Empty;
             (int x, int y) = Console.GetCursorPosition();
             do
             {
@@ -105,12 +105,12 @@ class MainClass
             return pets;
         }
 
-        //Ввод цветов
+        ///Ввод цветов
         static string[] Getcolors()
         {
             string[] favcolors;
             Console.Write("У Вас есть любимые цвета? (д/н): ");
-            string inputstr = "";
+            string inputstr = String.Empty;
             (int x, int y) = Console.GetCursorPosition();
             do
             {
@@ -138,7 +138,7 @@ class MainClass
             return favcolors;
         }
        
-        // Печать данных пользователя
+        ///Печать данных пользователя
         static void PrintUser ((string name, string surname, int age, string[] pets, string[] favcolors) User)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
