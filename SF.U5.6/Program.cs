@@ -32,7 +32,7 @@ class MainClass
         ///Проверка ввода Имени/Фамилии. Проверяет, что не цифра и не ""
         static string GetName ()
         {
-            string inputstr = String.Empty;
+            string? inputstr = String.Empty;
             bool check;
             int check2;
             (int x, int y) = Console.GetCursorPosition();
@@ -51,7 +51,7 @@ class MainClass
         ///Проверка ввода возраста. Проверяет, что цифра в диапазоне 1-100
         static int GetAge()
         {
-            string inputstr = "";
+            string? inputstr = String.Empty;
             int age = 0;
             bool check;
             (int x, int y) = Console.GetCursorPosition();
@@ -77,7 +77,7 @@ class MainClass
         {
             string[] pets;
             Console.Write("У Вас есть домашние питомцы? (д/н): ");
-            string inputstr = String.Empty;
+            string? inputstr = String.Empty;
             (int x, int y) = Console.GetCursorPosition();
             do
             {
@@ -110,7 +110,7 @@ class MainClass
         {
             string[] favcolors;
             Console.Write("У Вас есть любимые цвета? (д/н): ");
-            string inputstr = String.Empty;
+            string? inputstr = String.Empty;
             (int x, int y) = Console.GetCursorPosition();
             do
             {
