@@ -1,21 +1,42 @@
 ﻿/// Задание 5.6 
 
 using System;
-
+class UserType
+{
+    public string name;
+    public string surname;
+    public int age;
+    public string[] pets;
+    public string[] favcolors;
+    
+    ///Печать данных пользователя
+    public void PrintUser()
+    {
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("_________________________\nАНКЕТА ПОЛЬЗОВАТЕЛЯ \n-------------------------\nФИО: {0} {1} \nВозраст: {2}", surname, name, age);
+        Console.WriteLine("Домашние животные:");
+        foreach (string i in pets)
+            Console.WriteLine(i);
+        Console.WriteLine("Любимые цвета: ");
+        foreach (string i in favcolors)
+            Console.WriteLine(i);
+        Console.ForegroundColor = ConsoleColor.White;
+    }
+}
 class MainClass
 {
     public static void Main()
     {
-        (string name, string surname, int age, string[] pets, string[] favcolors) User;
+      
+    UserType User;
+       User = EnterUser();
 
-        User = EnterUser();
-
-        PrintUser(User);
+        User.PrintUser();
  
 
-         static (string name, string surname, int age, string[] pets, string[] favcolors) EnterUser()
+         static UserType EnterUser()
         {
-            (string name, string surname, int age, string[] pets, string[] favcolors) User;
+            UserType User = new UserType();
 
             Console.Write("Добрый день! \nВведите ваше имя: ");
             User.name = GetName();
@@ -138,18 +159,6 @@ class MainClass
             return favcolors;
         }
        
-        ///Печать данных пользователя
-        static void PrintUser ((string name, string surname, int age, string[] pets, string[] favcolors) User)
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("_________________________\nАНКЕТА ПОЛЬЗОВАТЕЛЯ \n-------------------------\nФИО: {0} {1} \nВозраст: {2}", User.surname, User.name, User.age);
-            Console.WriteLine("Домашние животные:");
-            foreach (string i in User.pets)
-                Console.WriteLine(i);
-            Console.WriteLine("Любимые цвета: ");
-            foreach (string i in User.favcolors)
-                Console.WriteLine(i);
-            Console.ForegroundColor = ConsoleColor.White;
-        }
+       
     }
 }
