@@ -58,11 +58,7 @@ class PickPointDelivery : Delivery
 						break;
 					case 2:
 						PPAddr = "PickPoint №2: Комсомольская площадь, д.3, Москва, Россия, 107140";
-						break;
-					default:
-						PPAddr = "Самовывоз из магазина по адресу: Большая Семёновская ул., д.26, Москва, Россия, 107023";
-						break;
-				}
+						break;									}
 			}
 			else Console.WriteLine("Некорректный ввод данных. На данный момент PickPoint не выбран");
 				
@@ -136,7 +132,10 @@ abstract class Clothes: Product
 }
 class Tshort: Clothes
 {
-	
+	public override void Description()
+	{
+		Console.WriteLine("Футболка");
+	}
 }
 class Short : Clothes
 {
@@ -230,12 +229,21 @@ public static class Getinfo
 
 }
 
-
+public class Stock<T>
+{
+	public T Pposition;
+}
 
 class Program
 {
 	static void Main()
 	{
+		List <Product> inStock = new List <Product>();
+		inStock.Add(new Tshort { ID = 1 });
+
+		Console.WriteLine(inStock[0].GetType);
+		Console.WriteLine(inStock[0].Description);
+		
 		/*
 		Ввод товаров
 		На хер склад - у каждого товара кол-во
@@ -250,7 +258,7 @@ class Program
 		//Console.WriteLine(str);
 
 		PickPointDelivery delivery = new PickPointDelivery();
-		delivery.Address="3";
+		delivery.Address="1";
 
 		Console.WriteLine(delivery.Address);
 
