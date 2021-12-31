@@ -29,13 +29,19 @@ using System;
 abstract class Delivery
 {
 	public abstract string Address { get; set;}
-	public float Price;
+	public abstract double Price { get; set; }
 	public abstract void DeliveryMethod();
 	
 }
 
 class HomeDelivery : Delivery
 {
+	private double _price;
+	public override double Price
+	{
+		get { return _price; }
+		set { _price = value; }
+	}
 	public override string Address { get; set; }
 	public override void DeliveryMethod()
 	{
@@ -45,6 +51,12 @@ class HomeDelivery : Delivery
 
 class PickPointDelivery : Delivery
 {
+	private double _price = 100.5;
+	public override double Price
+	{
+		get { return _price; }
+		set { Console.WriteLine("Доставка до точки сбора стоит {0} руб.",_price); }
+	}
 	private static string PPAddr = String.Empty;
 	public override string Address 
 	{ get { return PPAddr; }
@@ -72,20 +84,26 @@ class PickPointDelivery : Delivery
 
 class ShopDelivery : Delivery
 {
-	private static string ShopAddr = "Большая Семёновская ул.,д.26, Москва, Россия, 107023";
+	public override double Price { 
+		get { return 0; } 
+		set { Console.WriteLine("Самовывоз осуществляется бесплатно");} 
+	}
+    private static string ShopAddr = "Большая Семёновская ул.,д.26, Москва, Россия, 107023";
 	public override string Address 
 	{ get { return ShopAddr; }
 	set { Console.WriteLine("Адрес магазина нельзя изменить"); }
 	}
+
 	public override void DeliveryMethod()
 	{
 		Console.WriteLine("Самовывоз");
 	}
 }
 
-class Order<TDelivery,TStruct> where TDelivery : Delivery
+class Order<TDelivery> where TDelivery : Delivery
 {
 	public TDelivery Delivery;
+	
 
 	public int Number;
 
@@ -103,7 +121,7 @@ abstract class Product
 {
 	public int ID;
 	public int Quantity;
-	public decimal Price { get; set; }
+	public double Price { get; set; }
 		
 	public enum Origin : byte
 	{
@@ -154,6 +172,98 @@ abstract class Shoes: Product
 	}
 }
 
+public class User
+{
+	public Address Address;
+	private long _phone;
+	public string Name { get; set; }
+	public string Phone { get => String.Format("{0:+# (###) ###-##-##}", _phone);
+		set
+		{ if (long.TryParse(value, out long phone))
+				_phone = phone;
+			else _phone = 0;
+		}
+			}
+	public User()
+    {
+		Address = new Address();
+		_phone =default(int);
+		Name = default(string);
+    }
+	public User(string name): base() 
+	{
+		Name = name;
+	}
+	public User(string name, string phone) 
+	{
+		Address = new Address();
+		Phone = phone;
+		Name = name;
+		
+	}
+}
+
+public class Address
+{
+	private string _Street;
+	private int _house;
+	private int _Appartment;
+	private string _City;
+	private string _Country;
+	private string _PostalCode;
+
+	public string Street 
+	{ get { return _Street; }
+		set { _Street = value; } 
+	}
+	public int House { get => _house;  set => _house = value; }
+	public int Appartment { get => _Appartment; set { _Appartment = value; } }
+	public string City	{get => _City; set => _City = value; }
+	public string Country
+	{
+		get { return _Country; }
+		set { _Country = value; }
+	}
+	public string PostalCode
+	{
+		get { return _PostalCode; }
+		set { _PostalCode = value;
+			if (_PostalCode.Length > 6)
+				_PostalCode = _PostalCode.Substring(0, 6);
+		}
+	}
+	/// Установить адрес поэлементно
+	public void SetAdr ()
+		{
+		Console.Write("Улица: ");
+		_Street = Getinfo.GetName();
+
+		Console.Write("Дом: ");
+		_house = Getinfo.GetNumber();
+
+		Console.Write("Квартира: ");
+		_Appartment = Getinfo.GetNumber();
+
+		Console.Write("Город: ");
+		_City = Getinfo.GetName();
+
+		Console.Write("Страна: ");
+		_Country = Getinfo.GetName();
+
+		Console.Write("Почтовый индекс: ");
+		_PostalCode = Console.ReadLine();
+		if (_PostalCode.Length > 6)
+			_PostalCode = _PostalCode.Substring(0, 6);
+	}
+	///Получение адреса в виде строки
+	public string Show()
+    {
+		string address = $"Улица {_Street}, д.{_house}, кв.{_Appartment}, {_City}, {_Country}, {_PostalCode}";
+		return address;
+	}
+	
+	
+	}
 
 public static class Getinfo
 {
@@ -201,38 +311,14 @@ public static class Getinfo
 		return inputstr;
 	}
 
-	///Получение адреса в виде строки
-	public static string GetAddress()
-	{
-
-		Console.Write("Улица: ");
-		string Street = Getinfo.GetName(); ;
-
-		Console.Write("Дом: ");
-		int house = Getinfo.GetNumber();
-
-		Console.Write("Квартира: ");
-		int Appartment = Getinfo.GetNumber();
-
-		Console.Write("Город: ");
-		string City = Getinfo.GetName();
-
-		Console.Write("Страна: ");
-		string Country = Getinfo.GetName();
-
-		Console.Write("Почтовый индекс: ");
-		string PostalCode = Console.ReadLine().Substring(0,6);
-
-		string address = $"Улица {Street}, д.{house}, кв.{Appartment}, {City}, {Country}, {PostalCode}";
-		return address;
-	}
+	
 
 }
 
-public class Stock<T>
-{
-	public T Pposition;
-}
+//public class Stock<T>
+//{
+//	public T Pposition;
+//}
 
 class Program
 {
@@ -241,10 +327,10 @@ class Program
 		List <Product> inStock = new List <Product>();
 		inStock.Add(new Tshort { ID = 1 });
 
-		Console.WriteLine(inStock[0].GetType);
+        /*Console.WriteLine(inStock[0].GetType);
 		Console.WriteLine(inStock[0].Description);
 		
-		/*
+		
 		Ввод товаров
 		На хер склад - у каждого товара кол-во
 		 
@@ -253,16 +339,31 @@ class Program
 		выбор способа доставки
 		*/
 
-		//string str = Getinfo.GetAddress(); 
+        //string str = getinfo.getaddress();
 
-		//Console.WriteLine(str);
+        //console.writeline(str);
 
-		PickPointDelivery delivery = new PickPointDelivery();
-		delivery.Address="1";
+        //shopdelivery shopdelivery1 = new shopdelivery();
 
-		Console.WriteLine(delivery.Address);
+        //PickPointDelivery delivery = new PickPointDelivery();
+        //delivery.Address = "1";
 
+        //Console.WriteLine(delivery.Address);
 
-		Console.ReadKey();
+        //Order<PickPointDelivery> order1 = new  Order<PickPointDelivery> {Delivery = delivery, Number=1, Description="Пробный" }; 
+
+        //order1.DisplayAddress();
+
+        User a = new User("Петр Иванов", "79153981765");
+        //a.Address.SetAdr();
+        a.Phone = "79153981765";
+        a.Address.City = "Москва";
+
+        Console.WriteLine($"{a.Name},\nТел.: \t{a.Phone} \n{a.Address.Show()}");
+       
+
+       
+
+        Console.ReadKey();
 	}
 }
