@@ -43,6 +43,11 @@ class HomeDelivery : Delivery
 		set { _price = value; }
 	}
 	public override Address Address { get; set; }
+
+	public HomeDelivery(Address address)
+	{
+		Address = address;
+	}
 	public override void DeliveryMethod()
 	{
 	Console.WriteLine("Доставка на дом");
@@ -71,14 +76,19 @@ class PickPointDelivery : Delivery
 	public override double Price
 	{
 		get { return _price; }
-		set { Console.WriteLine("Доставка до точки сбора стоит {0} руб.",_price); }
+		set { Console.WriteLine("Доставка до точки сбора стоит {0} руб.", _price); }
 	}
 	protected static Address _PPAddr = new Address();
 	public override Address Address { get => _PPAddr; set => _PPAddr = value; }
-	
+
+	public PickPointDelivery (Address address)
+		{
+		Address = address;
+	}
 	public override void DeliveryMethod()
 	{
 		Console.WriteLine("Доставка до точки сбора");
+		Console.WriteLine(Address.Show());
 	}
 }
 
@@ -93,7 +103,10 @@ class ShopDelivery : Delivery
 	{ get { return ShopAddr; }
 	set { Console.WriteLine("Адрес магазина нельзя изменить"); }
 	}
-
+	public ShopDelivery()
+	{
+		
+	}
 	public override void DeliveryMethod()
 	{
 		Console.WriteLine("Самовывоз");
@@ -109,18 +122,18 @@ class Order<TDelivery> where TDelivery : Delivery
 
 	public string Description;
 
-	List<Product> Cart = new List<Product>();
+	//List<Product> Cart = new List<Product>();
 
 	public void DisplayAddress()
 	{
 		Console.WriteLine(Delivery.Address);
 	}
-
-	// ... Другие поля
+		
 }
 
-class Product
+class Product<PType> where PType : ProductType
 {
+	public PType ProductType;
 	public int ID;
 	public int Quantity;
 	protected double _Price;
@@ -143,7 +156,13 @@ class Product
 	}
 }
 
-abstract class Clothes: Product
+abstract class ProductType
+{
+	public string Type { get; set; }
+	public bool Food { get; set; } = false;
+}
+
+class Clothes: ProductType
 {
 	public string Material;
 	public string Color; 
@@ -155,18 +174,8 @@ abstract class Clothes: Product
 		Women
     }
 }
-class Tshort: Clothes
-{
-	public override void Description()
-	{
-		Console.WriteLine("Футболка");
-	}
-}
-class Short : Clothes
-{
-	
-}
-abstract class Shoes: Product
+
+class Shoes: ProductType
 {
 	public string Material;
 	public string Color;
@@ -350,11 +359,7 @@ class Program
 
 
 
-		/* List <Product> inStock = new List <Product>();
-		inStock.Add(new Tshort { ID = 1 });
-
-		Console.WriteLine(inStock[0].GetType);
-		Console.WriteLine(inStock[0].Description);
+		/* 
 		
 		
 		Ввод товаров
@@ -363,7 +368,7 @@ class Program
 		Ввод данных покупателя
 		формирование заказа
 		выбор способа доставки
-
+		заказ: добавляем в заказ, убираем кол-во из "склада"
 
 		 */
 
