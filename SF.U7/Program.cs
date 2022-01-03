@@ -81,9 +81,9 @@ class PickPointDelivery : Delivery
 	private static Address _PPAddr = new Address();
 	public override Address Address { get => _PPAddr; set => _PPAddr = value; }
 
-	public PickPointDelivery (Address address)
+	public PickPointDelivery ()
 		{
-		Address = address;
+		_PPAddr = new Address();
 	}
 	public override void DeliveryMethod()
 	{
@@ -121,11 +121,14 @@ class Order<TDelivery> where TDelivery : Delivery
 
 	public string Description;
 
-	List<Product> Cart;
+	private List<Product> _Cart;
+	
+	public List<Product> Cart 
+	{ get => _Cart; }
 
-	public Order()
+	public Order(List<Product> ordered)
 	{
-	Cart = new List<Product>();
+	_Cart = ordered;
 	}
 	public void DisplayAddress()
 	{
@@ -288,10 +291,10 @@ public class Address
 		_Street = _Street.GetName();
 
 		Console.Write("Дом: ");
-		_house = _house.GetNumber();
+		_house = _house.GetNumber(1,500);
 
 		Console.Write("Квартира: ");
-		_Appartment = _Appartment.GetNumber();
+		_Appartment = _Appartment.GetNumber(1,500);
 
 		Console.Write("Город: ");
 		_City = _City.GetName();
@@ -319,8 +322,8 @@ public class Address
 /// </summary>
 public static class IntExtansion
 {
-	///Проверка ввода числа. Проверяет, что число и оно положительное
-	public static int GetNumber(this int number)
+	///Проверка ввода числа. Проверяет, что число и оно в диапазоне от a до b
+	public static int GetNumber(this int number, int a, int b)
 	{
 		string? inputstr = String.Empty;
 		bool check;
@@ -330,14 +333,14 @@ public static class IntExtansion
 			Console.SetCursorPosition(x, y);
 			inputstr = Console.ReadLine();
 			check = !int.TryParse(inputstr, out number) | (inputstr == "");
-			if (!check && (number < 1))
+			if (!check && ((number < a)|(number>b)))
 			{
-				Console.Write("Видимо вы ошиблись, попробуйте еще раз: ");
+				Console.Write("Видимо вы ошиблись, попробуйте еще раз ввести целое число от {0} до {1}: ", a, b);
 				(x, y) = Console.GetCursorPosition();
 			}
 
 		}
-		while (check | (number < 1));
+		while (check | ((number < a) | (number > b)));
 
 		return number;
 	}
@@ -399,6 +402,7 @@ public static class StringExtansion
 			return string.Format("{0}{1}", char.ToUpper(inputstr[0]), inputstr.Remove(0, 1));
 		}
 
+
 }
 
 /// <summary>
@@ -425,6 +429,7 @@ class Range
 		foreach (Product product in products)
 			Console.WriteLine(product.Show());
     }
+		
 }
 
 class Program
@@ -453,10 +458,12 @@ class Program
 		
 		Random rnd = new Random();
 		
+		///Добавляем случайное кол-во товара на склад 
 		for (int i = 0; i < range.products.Length; i++)
 			AddToStock(range[i], rnd.Next(1,15));
 
 		
+
 		///Добавляет нужное кол-во товара на склад
 		void AddToStock(Product product, int q)
         {
@@ -464,53 +471,149 @@ class Program
 				Stock.Add(product);
         }
 
+		
+
+
+		///показать все элементы списка
 		void ShowList(List<Product> list)
         {
 			foreach (Product product in list)
 				Console.WriteLine(product.Show());
         }
 
-		
+		///подсчет суммы товаров в списке
+		double TotalSum (List<Product> list)
+		{
+			double sum = 0;
+			foreach (Product product in list)
+				sum += product.Price;
+			return sum;
+		}
+
+		///подсчет кол-ва товаров в списке
+		int Count(List<Product> list)
+		{
+			int count = 0;
+			foreach (Product product in list)
+				count ++;
+			return count;
+		}
+
 		///создаем Покупателя
 		User buyer = new User();
 		Console.Write("Ввести данные вручную (1) или выбрать пользователя по умолчанию (2): ");
 
 		int choice = 0;
-		choice = choice.GetNumber();
+		choice = choice.GetNumber(1,2);
 		if (choice == 2)
-			buyer = User.Deafault();
+			buyer = User.Deafault(); //исключительно для удобства (чтобы не вводить по 100 раз во время тестирования)
 		else buyer = User.GetUser();
 
 		Console.WriteLine($"Ваши данные: \nИмя: \t{buyer.Name},\nТел.: \t{buyer.Phone} \n{buyer.Address.Show()}");
 
-		Console.Write("Какой тип доставки предпочитаете:\n1)\tсамовывоз из магазина \n2)\tзабрать из почтомата\n3)\tдоставка до дома (по умолчанию)\n");
-		choice = choice.GetNumber();
+		
+
+		///Создаем заказ
+		List<Product> Ordered = new List<Product>();
+		int key = 0;
+		do {
+			Console.ForegroundColor = ConsoleColor.Yellow;
+			Console.WriteLine("____________________\nДобавить товар в корзину - 1\nПосмотреть товары в корзине -2\nПосмотреть все товары в ассортименте -3\nПосмотреть товары на складе-4\nПерейти к оформлению заказа -0\n____________________");
+			Console.ResetColor();
+			key = key.GetNumber(0, 4);
+			
+			switch (key)
+            {
+				case 0: continue;
+					case 1:
+					{
+						Console.WriteLine("Для добавления товара в корзину введите # товара:");
+						int inpid = 0;
+						inpid = inpid.GetNumber(1, 5); //можно заморочиться и определить диапазон ID товаров 
+						Product fp = (Stock.Find(x => x.ID == inpid));
+						if (fp == null)
+						{
+							Console.ForegroundColor = ConsoleColor.Red; 
+							Console.WriteLine("Товар закончился на складе");
+							Console.ResetColor();
+						}
+						else
+						{
+							Console.WriteLine("В корзину добавлен товар:");
+							Console.WriteLine(fp.Show());
+							Stock.Remove(fp);
+							Ordered.Add(fp);
+						}
+						break;
+					}
+					case 2:
+                    {
+						Console.ForegroundColor = ConsoleColor.DarkYellow;
+						Console.WriteLine("Товары в корзине:");
+						ShowList(Ordered);
+						Console.BackgroundColor = ConsoleColor.DarkBlue;
+						Console.Write("Всего выбрано товаров: {0},  на сумму: {1} руб.", Count(Ordered), TotalSum(Ordered));
+						Console.ResetColor();
+						Console.WriteLine();
+						break;
+					}
+				case 3:
+					{
+						Console.WriteLine("Товары в ассортименте:");
+						range.ShowAll();
+						break;
+					}
+				case 4:
+					{
+						Console.WriteLine("Товары на складе:");
+						ShowList(Stock);
+						break;
+					}
+			}				
+			
+		}
+		while (key != 0);
+
+		Console.Write("Какой тип доставки предпочитаете:\n1)\tсамовывоз из магазина \n2)\tзабрать из почтомата\n3)\tдоставка до дома\n");
+		choice = choice.GetNumber(1,3);
+		
+		//Почему через if? Потому, что тоже самое через switch не работает! - см ниже
+		if (choice == 1)
+		{ Order<ShopDelivery> order = new Order<ShopDelivery>(Ordered); }
+		else if (choice == 2) 
+		{ Order<PickPointDelivery> order = new Order<PickPointDelivery>(Ordered);
+			Console.WriteLine("Доступны следующие точки:");
+			foreach (Address adr in Mypickpoints.addresses)
+				Console.WriteLine(adr.Show());
+			Console.WriteLine("Выберете по номеру (от 1 до {0})", Mypickpoints.addresses.Length);
+			key = key.GetNumber(1, Mypickpoints.addresses.Length);
+			order.Delivery.Address = Mypickpoints[key - 1];
+
+		}
+		else 
+		{ Order<HomeDelivery> order = new Order<HomeDelivery>(Ordered); }
+
 		//switch (choice)
-  //      {
+		//      {
 		//	case 1: Order<ShopDelivery> order = new Order<ShopDelivery>();
 		//		break;
 		//	case 2: Order<PickPointDelivery> order = new Order<PickPointDelivery>();
-				//выбор пикпоинта и засылание его адреса в заказ
+		//выбор пикпоинта и засылание его адреса в заказ
 		//		break;
 		//	default: Order<HomeDelivery> order = new Order<HomeDelivery>();
 		//		break;
-  //      }
-
-
-		/* 
+		//      }
 		
+		      	
+		Console.ForegroundColor = ConsoleColor.DarkYellow;
+		Console.WriteLine("Ваш заказ: ");
+		ShowList(order.Cart);
+		Console.BackgroundColor = ConsoleColor.DarkBlue;
+		Console.Write("Всего выбрано товаров: {0},  на сумму: {1} руб.", Count(Ordered), TotalSum(Ordered));
+		Console.ResetColor();
+		Console.WriteLine();
+
 		
-		Ввод товаров
-		
-		 
-		Ввод данных покупателя
-		формирование заказа
-		выбор способа доставки
-		заказ: добавляем в заказ, убираем кол-во из "склада"
-
-		 */
-
-
 
 
 
