@@ -36,7 +36,7 @@ abstract class Delivery
 
 class HomeDelivery : Delivery
 {
-	protected double _price;
+	private double _price;
 	public override double Price
 	{
 		get { return _price; }
@@ -72,13 +72,13 @@ class Pickpoint
 }
 class PickPointDelivery : Delivery
 {
-	protected double _price = 100.5;
+	private double _price = 100.5;
 	public override double Price
 	{
 		get { return _price; }
 		set { Console.WriteLine("Доставка до точки сбора стоит {0} руб.", _price); }
 	}
-	protected static Address _PPAddr = new Address();
+	private static Address _PPAddr = new Address();
 	public override Address Address { get => _PPAddr; set => _PPAddr = value; }
 
 	public PickPointDelivery (Address address)
@@ -98,7 +98,7 @@ class ShopDelivery : Delivery
 		get { return 0; }
 		set { Console.WriteLine("Самовывоз осуществляется бесплатно"); }
 	}
-	protected static Address ShopAddr = new Address{ Street = "Большая Семёновская", House = 26, City = "Москва", Country = "Россия", PostalCode = "107023" };
+	private static Address ShopAddr = new Address{ Street = "Большая Семёновская", House = 26, City = "Москва", Country = "Россия", PostalCode = "107023" };
 	public override Address Address 
 	{ get { return ShopAddr; }
 	set { Console.WriteLine("Адрес магазина нельзя изменить"); }
@@ -116,14 +116,17 @@ class ShopDelivery : Delivery
 class Order<TDelivery> where TDelivery : Delivery
 {
 	public TDelivery Delivery;
-	
 
 	public int Number;
 
 	public string Description;
 
-	//List<Product> Cart = new List<Product>();
+	List<Product> Cart;
 
+	public Order()
+	{
+	Cart = new List<Product>();
+	}
 	public void DisplayAddress()
 	{
 		Console.WriteLine(Delivery.Address);
@@ -131,61 +134,53 @@ class Order<TDelivery> where TDelivery : Delivery
 		
 }
 
-class Product<PType> where PType : ProductType
+class Product
 {
-	public PType ProductType;
-	public int ID;
-	public int Quantity;
-	protected double _Price;
+	public int ID {get; set; }
+	//private int _Quantity;
+	private double _Price;
 	public double Price 
 	{ get => _Price; 
 		set { if (value > 0)
 				_Price = value;		} 
 	}
-		
-	public enum Origin : byte
-	{
-		Неизвестно = 0,
-		Россия = 1,
-		США,
-		Китай
-	}
-	public virtual void Description()
-	{ 
-		Console.WriteLine($"Это продукт"); 
-	}
-}
-
-abstract class ProductType
-{
-	public string Type { get; set; }
-	public bool Food { get; set; } = false;
-}
-
-class Clothes: ProductType
-{
-	public string Material;
-	public string Color; 
+	//public int Quantity { get => _Quantity;
+	//	set { if (value > 0)
+	//			_Quantity = value;}
+	//	}
+	public string Origin;
+	public Sex Sextype;
+	public Type Ptype;
 	public string Size;
-	public enum Sex: byte
-    {
-		Unisex =0,
-		Men,
-		Women
-    }
-}
-
-class Shoes: ProductType
-{
-	public string Material;
-	public string Color;
-	public float Size;
 	public enum Sex : byte
 	{
 		Unisex = 0,
 		Men,
 		Women
 	}
+	public enum Type: byte
+    {
+		Футболка,
+		Шорты,
+		Кроссовки
+    }
+	public string Description { get; set; }
+
+	public Product (int id, string description, double price, Type type, string origin, Sex sex, string size)
+    {
+		ID = id;
+		Description = description;
+		Price = price;
+		Ptype = type;
+		Origin = origin;
+		Sextype = sex;
+		Size = size;
+
+	}
+	public string Show()
+    {
+		return $"#{ID}\t{Description}\tЦена: {Price}\tПроизводство: {Origin}";
+    }
 }
 
 public class User
@@ -217,16 +212,40 @@ public class User
 		Name = name;
 		
 	}
+	public User(string name, string phone, Address address)
+	{
+		Address = address;
+		Phone = phone;
+		Name = name;
+
+	}
+	public static User Deafault()
+	{ 
+		return new User("Петр Иванов", "79153981765", new Address ("Домашний адресс: ", "Измайловский Вал", 2, "Москва", "Россия", "105318", 1));
+	}
+	public static User GetUser()
+	{
+		User a = new User();
+		Console.Write("Введите имя и фамилию: ");
+		a.Name = a.Name.GetName();
+		Console.Write("Введите телефон (11 цифр): ");
+		long p = 0;
+		p = p.GetPhone();
+		a.Phone = p.ToString();
+		a.Address.SetAdr();
+		a.Address.Description = "Домашний адрес: ";
+		return new User(a.Name, p.ToString(), a.Address);
+	}
 }
 
 public class Address
 {
-	protected string _Street;
-	protected int _house;
-	protected int _Appartment;
-	protected string _City;
-	protected string _Country;
-	protected string _PostalCode;
+	private string _Street;
+	private int _house;
+	private int _Appartment;
+	private string _City;
+	private string _Country;
+	private string _PostalCode;
 	public string? Description { get; set; }
 	public string Street 
 	{ get { return _Street; }
@@ -247,6 +266,20 @@ public class Address
 			if (_PostalCode.Length > 6)
 				_PostalCode = _PostalCode.Substring(0, 6);
 		}
+	}
+	public Address()
+    {
+
+    }
+	public Address(string description, string street, int house, string city, string country, string postcode, int appartment)
+	{
+		Description = description;
+		Street = street;
+		House = house;
+		City = city;
+		Country = country;
+		PostalCode = postcode;
+		Appartment = appartment;
 	}
 	/// Установить адрес поэлементно
 	public void SetAdr ()
@@ -308,6 +341,29 @@ public static class IntExtansion
 
 		return number;
 	}
+
+	///Проверка ввода номера телефона. Проверяет, что число, положительное и 11 цифр
+	public static long GetPhone(this long number)
+	{
+		string? inputstr = String.Empty;
+		bool check;
+		(int x, int y) = Console.GetCursorPosition();
+		do
+		{
+			Console.SetCursorPosition(x, y);
+			inputstr = Console.ReadLine();
+			check = !long.TryParse(inputstr, out number) | (inputstr == "");
+			if (!check && ((number < 10000000000) | (number > 99999999999)))
+			{
+				Console.Write("Видимо вы ошиблись. Должно быть 11 цифр. Попробуйте еще раз: ");
+				(x, y) = Console.GetCursorPosition();
+			}
+
+		}
+		while (check | (number < 10000000000) | (number > 99999999999));
+
+		return number;
+	}
 }
 
 /// <summary>
@@ -345,6 +401,31 @@ public static class StringExtansion
 
 }
 
+/// <summary>
+/// Ассортимент товаров
+/// </summary>
+class Range
+{
+	public Product[] products;
+
+	public Range (Product[] list) => products = list;
+
+	/// <summary>
+	/// Индексация
+	/// </summary>
+	/// <param name="index"></param>
+	/// <returns></returns>
+	public Product this[int index]
+	{
+		get => products[index];
+		set => products[index] = value;
+	}
+	public void ShowAll()
+    {
+		foreach (Product product in products)
+			Console.WriteLine(product.Show());
+    }
+}
 
 class Program
 {
@@ -355,15 +436,72 @@ class Program
 		{ new Address  { Description ="PickPoint №1: ", Street = "Измайловский Вал", House = 2, City = "Москва", Country = "Россия", PostalCode = "105318"},
 		new Address { Description ="PickPoint №2: ", Street = "Комсомольская площадь", House = 3, City = "Москва", Country = "Россия", PostalCode = "107140"}});
 
-		Console.WriteLine(Mypickpoints[1].Show());
+		//Console.WriteLine(Mypickpoints[1].Show());
 
+		///Создаем товары 
+				
+		Product P1 = new Product(1,"Футболка с длинным рукавом", 1518.2, Product.Type.Футболка,"Вьетнам",Product.Sex.Men,"XXL");
+		Product P2 = new Product(2, "Кроссовки беговые", 5450, Product.Type.Кроссовки, "Китай", Product.Sex.Women, "38");
+		Product P3 = new Product(3, "Шорты теннисные", 2030, Product.Type.Шорты, "Тайланд", Product.Sex.Men, "L");
+		Product P4 = new Product(4, "Футболка с коротким рукавом", 1318.8, Product.Type.Футболка, "Вьетнам", Product.Sex.Men, "XL");
+		Product P5 = new Product(5, "Футболка с коротким рукавом", 1420.8, Product.Type.Футболка, "Вьетнам", Product.Sex.Women, "M");
+		
+		Range range = new Range(new[] { P1, P2, P3, P4, P5 });
+
+		///Создаем склад
+		List <Product> Stock = new List<Product>();
+		
+		Random rnd = new Random();
+		
+		for (int i = 0; i < range.products.Length; i++)
+			AddToStock(range[i], rnd.Next(1,15));
+
+		
+		///Добавляет нужное кол-во товара на склад
+		void AddToStock(Product product, int q)
+        {
+			for (int i = 0; i < q; i++)
+				Stock.Add(product);
+        }
+
+		void ShowList(List<Product> list)
+        {
+			foreach (Product product in list)
+				Console.WriteLine(product.Show());
+        }
+
+		
+		///создаем Покупателя
+		User buyer = new User();
+		Console.Write("Ввести данные вручную (1) или выбрать пользователя по умолчанию (2): ");
+
+		int choice = 0;
+		choice = choice.GetNumber();
+		if (choice == 2)
+			buyer = User.Deafault();
+		else buyer = User.GetUser();
+
+		Console.WriteLine($"Ваши данные: \nИмя: \t{buyer.Name},\nТел.: \t{buyer.Phone} \n{buyer.Address.Show()}");
+
+		Console.Write("Какой тип доставки предпочитаете:\n1)\tсамовывоз из магазина \n2)\tзабрать из почтомата\n3)\tдоставка до дома (по умолчанию)\n");
+		choice = choice.GetNumber();
+		//switch (choice)
+  //      {
+		//	case 1: Order<ShopDelivery> order = new Order<ShopDelivery>();
+		//		break;
+		//	case 2: Order<PickPointDelivery> order = new Order<PickPointDelivery>();
+				//выбор пикпоинта и засылание его адреса в заказ
+		//		break;
+		//	default: Order<HomeDelivery> order = new Order<HomeDelivery>();
+		//		break;
+  //      }
 
 
 		/* 
 		
 		
 		Ввод товаров
-		у каждого товара кол-во
+		
 		 
 		Ввод данных покупателя
 		формирование заказа
@@ -372,21 +510,14 @@ class Program
 
 		 */
 
-		///создаем Покупателя
-		User buyer = new User("Петр Иванов", "79153981765");
-		buyer.Address.Description = "Домашний адресс: ";
-		buyer.Address.Street = "Измайловский Вал";
-		buyer.Address.House = 2;
-		buyer.Address.City = "Москва";
-		buyer.Address.Country = "Россия";
-		buyer.Address.PostalCode = "105318";
-		buyer.Address.Appartment = 1;
-		
-		Console.WriteLine($"{buyer.Name},\nТел.: \t{buyer.Phone} \n{buyer.Address.Show()}");
-       
 
-       
 
-        Console.ReadKey();
+
+
+
+
+
+
+		Console.ReadKey();
 	}
 }
