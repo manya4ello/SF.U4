@@ -30,7 +30,7 @@ abstract class Delivery
 {
 	public abstract Address Address { get; set;}
 	public abstract double Price { get; set; }
-	public abstract void DeliveryMethod();
+	public abstract string DeliveryMethod { get; set; }
 	
 }
 
@@ -43,15 +43,13 @@ class HomeDelivery : Delivery
 		set { _price = value; }
 	}
 	public override Address Address { get; set; }
-
+	protected static string _DeliveryMethod = "Доставка на дом";
+	public override string DeliveryMethod { get => _DeliveryMethod; set => Console.WriteLine("Нельзя менять метод доставки"); }
 	public HomeDelivery(Address address)
 	{
 		Address = address;
 	}
-	public override void DeliveryMethod()
-	{
-	Console.WriteLine("Доставка на дом");
-	}
+	
 }
 
 class Pickpoint
@@ -81,15 +79,14 @@ class PickPointDelivery : Delivery
 	private static Address _PPAddr = new Address();
 	public override Address Address { get => _PPAddr; set => _PPAddr = value; }
 
-	public PickPointDelivery ()
+	public PickPointDelivery (Address address)
 		{
-		_PPAddr = new Address();
+		_PPAddr = address;
 	}
-	public override void DeliveryMethod()
-	{
-		Console.WriteLine("Доставка до точки сбора");
-		Console.WriteLine(Address.Show());
-	}
+
+	protected static string _DeliveryMethod = "Доставка до почтомата";
+	public override string DeliveryMethod { get => _DeliveryMethod; set => Console.WriteLine("Нельзя менять метод доставки"); }
+	
 }
 
 class ShopDelivery : Delivery
@@ -98,7 +95,7 @@ class ShopDelivery : Delivery
 		get { return 0; }
 		set { Console.WriteLine("Самовывоз осуществляется бесплатно"); }
 	}
-	private static Address ShopAddr = new Address{ Street = "Большая Семёновская", House = 26, City = "Москва", Country = "Россия", PostalCode = "107023" };
+	private static Address ShopAddr = new Address{ Description = "Адрес магазина: ", Street = "Большая Семёновская", House = 26, City = "Москва", Country = "Россия", PostalCode = "107023" };
 	public override Address Address 
 	{ get { return ShopAddr; }
 	set { Console.WriteLine("Адрес магазина нельзя изменить"); }
@@ -107,10 +104,8 @@ class ShopDelivery : Delivery
 	{
 		
 	}
-	public override void DeliveryMethod()
-	{
-		Console.WriteLine("Самовывоз");
-	}
+	protected static string _DeliveryMethod = "Самовывоз";
+	public override string DeliveryMethod { get => _DeliveryMethod; set => Console.WriteLine("Нельзя менять метод доставки"); }
 }
 
 class Order<TDelivery> where TDelivery : Delivery
@@ -132,7 +127,7 @@ class Order<TDelivery> where TDelivery : Delivery
 	}
 	public void DisplayAddress()
 	{
-		Console.WriteLine(Delivery.Address);
+		Console.WriteLine(Delivery.Address.Show);
 	}
 		
 }
@@ -518,7 +513,7 @@ class Program
 		int key = 0;
 		do {
 			Console.ForegroundColor = ConsoleColor.Yellow;
-			Console.WriteLine("____________________\nДобавить товар в корзину - 1\nПосмотреть товары в корзине -2\nПосмотреть все товары в ассортименте -3\nПосмотреть товары на складе-4\nПерейти к оформлению заказа -0\n____________________");
+			Console.WriteLine("____________________________\nДобавить товар в корзину - 1\nПосмотреть товары в корзине -2\nПосмотреть все товары в ассортименте -3\nПосмотреть товары на складе-4\nПерейти к оформлению заказа -0\n____________________________");
 			Console.ResetColor();
 			key = key.GetNumber(0, 4);
 			
@@ -552,7 +547,7 @@ class Program
 						Console.WriteLine("Товары в корзине:");
 						ShowList(Ordered);
 						Console.BackgroundColor = ConsoleColor.DarkBlue;
-						Console.Write("Всего выбрано товаров: {0},  на сумму: {1} руб.", Count(Ordered), TotalSum(Ordered));
+						Console.Write("Всего выбрано товаров: {0},  на сумму: {1:f} руб.", Count(Ordered), TotalSum(Ordered));
 						Console.ResetColor();
 						Console.WriteLine();
 						break;
@@ -576,22 +571,23 @@ class Program
 
 		Console.Write("Какой тип доставки предпочитаете:\n1)\tсамовывоз из магазина \n2)\tзабрать из почтомата\n3)\tдоставка до дома\n");
 		choice = choice.GetNumber(1,3);
-		
+		Order<Delivery> order = new Order<Delivery>(Ordered);
 		//Почему через if? Потому, что тоже самое через switch не работает! - см ниже
+		
 		if (choice == 1)
-		{ Order<ShopDelivery> order = new Order<ShopDelivery>(Ordered); }
+		{ order.Delivery = new ShopDelivery(); }
 		else if (choice == 2) 
-		{ Order<PickPointDelivery> order = new Order<PickPointDelivery>(Ordered);
+		{
 			Console.WriteLine("Доступны следующие точки:");
 			foreach (Address adr in Mypickpoints.addresses)
 				Console.WriteLine(adr.Show());
 			Console.WriteLine("Выберете по номеру (от 1 до {0})", Mypickpoints.addresses.Length);
 			key = key.GetNumber(1, Mypickpoints.addresses.Length);
-			order.Delivery.Address = Mypickpoints[key - 1];
+			order.Delivery = new PickPointDelivery(Mypickpoints[key - 1]);
 
 		}
 		else 
-		{ Order<HomeDelivery> order = new Order<HomeDelivery>(Ordered); }
+		{ order.Delivery = new HomeDelivery(buyer.Address); }
 
 		//switch (choice)
 		//      {
@@ -603,15 +599,20 @@ class Program
 		//	default: Order<HomeDelivery> order = new Order<HomeDelivery>();
 		//		break;
 		//      }
-		
-		      	
+
+
 		Console.ForegroundColor = ConsoleColor.DarkYellow;
-		Console.WriteLine("Ваш заказ: ");
-		ShowList(order.Cart);
-		Console.BackgroundColor = ConsoleColor.DarkBlue;
-		Console.Write("Всего выбрано товаров: {0},  на сумму: {1} руб.", Count(Ordered), TotalSum(Ordered));
+        Console.WriteLine("ваш заказ: ");
+        ShowList(order.Cart);
+        Console.BackgroundColor = ConsoleColor.DarkBlue;
+        Console.Write("Всего выбрано товаров: {0},  на сумму: {1:f} руб.", Count(order.Cart), TotalSum(order.Cart));
+        Console.ResetColor();
+        Console.WriteLine();
+		Console.ForegroundColor = ConsoleColor.DarkYellow;
+		Console.WriteLine("{0}:\n{1}",order.Delivery.DeliveryMethod, order.Delivery.Address.Show());
+		Console.WriteLine("Стоимость доставки: {0:f} руб.", order.Delivery.Price);
+		Console.WriteLine("Итого к оплате: {0:f} руб.", order.Delivery.Price+ TotalSum(order.Cart));
 		Console.ResetColor();
-		Console.WriteLine();
 
 		
 
