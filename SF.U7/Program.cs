@@ -313,9 +313,9 @@ public class Address
 	}
 
 /// <summary>
-/// Метод расширения типа int
+/// Метод расширения для различных типов данных
 /// </summary>
-public static class IntExtansion
+public static class Extansions
 {
 	///Проверка ввода числа. Проверяет, что число и оно в диапазоне от a до b
 	public static int GetNumber(this int number, int a, int b)
@@ -362,13 +362,7 @@ public static class IntExtansion
 
 		return number;
 	}
-}
 
-/// <summary>
-/// Метод расширения типа string
-/// </summary>
-public static class StringExtansion
-{
 	///Проверка ввода Имени Собственного. Проверяет, что не цифра и не ""
 	public static string GetName(this string inputstr)
 	{
@@ -495,6 +489,9 @@ class Program
 		}
 
 		///создаем Покупателя
+		Console.ForegroundColor = ConsoleColor.Yellow;
+		Console.WriteLine("Приветствуем вас в онлайн магазине \"Рога и Копыта\"! \nПожалуйста, представьтесь");
+		Console.ResetColor();
 		User buyer = new User();
 		Console.Write("Ввести данные вручную (1) или выбрать пользователя по умолчанию (2): ");
 
@@ -513,14 +510,21 @@ class Program
 		int key = 0;
 		do {
 			Console.ForegroundColor = ConsoleColor.Yellow;
-			Console.WriteLine("____________________________\nДобавить товар в корзину - 1\nПосмотреть товары в корзине -2\nПосмотреть все товары в ассортименте -3\nПосмотреть товары на складе-4\nПерейти к оформлению заказа -0\n____________________________");
+			Console.WriteLine("____________________________\n" +
+				"Добавить товар в корзину - 1\n" +
+				"Посмотреть товары в корзине -2\n" +
+				"Посмотреть все товары в ассортименте -3\n" +
+				"Посмотреть товары на складе-4\n" +
+				"Посмотреть данные пользователя -5\n" +
+				"Изменить данные пользователя-6\n" +
+				"\nПерейти к оформлению заказа -0\n____________________________");
 			Console.ResetColor();
-			key = key.GetNumber(0, 4);
-			
+			key = key.GetNumber(0, 6);
+
 			switch (key)
-            {
+			{
 				case 0: continue;
-					case 1:
+				case 1:
 					{
 						Console.WriteLine("Для добавления товара в корзину введите # товара:");
 						int inpid = 0;
@@ -528,7 +532,7 @@ class Program
 						Product fp = (Stock.Find(x => x.ID == inpid));
 						if (fp == null)
 						{
-							Console.ForegroundColor = ConsoleColor.Red; 
+							Console.ForegroundColor = ConsoleColor.Red;
 							Console.WriteLine("Товар закончился на складе");
 							Console.ResetColor();
 						}
@@ -541,13 +545,13 @@ class Program
 						}
 						break;
 					}
-					case 2:
-                    {
+				case 2:
+					{
 						Console.ForegroundColor = ConsoleColor.DarkYellow;
 						Console.WriteLine("Товары в корзине:");
 						ShowList(Ordered);
 						Console.BackgroundColor = ConsoleColor.DarkBlue;
-						Console.Write("Всего выбрано товаров: {0},  на сумму: {1:f} руб.", Count(Ordered), TotalSum(Ordered));
+						Console.Write("Всего выбрано товаров: {0} на сумму: {1:f} руб.", Count(Ordered), TotalSum(Ordered));
 						Console.ResetColor();
 						Console.WriteLine();
 						break;
@@ -564,48 +568,64 @@ class Program
 						ShowList(Stock);
 						break;
 					}
-			}				
-			
+				case 5:
+					{
+						Console.WriteLine($"____________________________\nВаши данные: \nИмя: \t{buyer.Name},\nТел.: \t{buyer.Phone} \n{buyer.Address.Show()}\n____________________________");
+						break;
+					}
+				case 6:
+					{
+						Console.Write("Ввести данные вручную (1) или выбрать пользователя по умолчанию (2): ");
+
+						choice = choice.GetNumber(1, 2);
+						if (choice == 2)
+							buyer = User.Deafault(); 
+						else buyer = User.GetUser();
+
+						break;
+					}
+			}
 		}
 		while (key != 0);
 
 		Console.Write("Какой тип доставки предпочитаете:\n1)\tсамовывоз из магазина \n2)\tзабрать из почтомата\n3)\tдоставка до дома\n");
 		choice = choice.GetNumber(1,3);
 		Order<Delivery> order = new Order<Delivery>(Ordered);
-		//Почему через if? Потому, что тоже самое через switch не работает! - см ниже
 		
-		if (choice == 1)
-		{ order.Delivery = new ShopDelivery(); }
-		else if (choice == 2) 
-		{
-			Console.WriteLine("Доступны следующие точки:");
-			foreach (Address adr in Mypickpoints.addresses)
-				Console.WriteLine(adr.Show());
-			Console.WriteLine("Выберете по номеру (от 1 до {0})", Mypickpoints.addresses.Length);
-			key = key.GetNumber(1, Mypickpoints.addresses.Length);
-			order.Delivery = new PickPointDelivery(Mypickpoints[key - 1]);
-
-		}
-		else 
-		{ order.Delivery = new HomeDelivery(buyer.Address); }
-
-		//switch (choice)
-		//      {
-		//	case 1: Order<ShopDelivery> order = new Order<ShopDelivery>();
-		//		break;
-		//	case 2: Order<PickPointDelivery> order = new Order<PickPointDelivery>();
-		//выбор пикпоинта и засылание его адреса в заказ
-		//		break;
-		//	default: Order<HomeDelivery> order = new Order<HomeDelivery>();
-		//		break;
-		//      }
-
+		switch (choice)
+        {
+			case 1: { 
+					order.Delivery = new ShopDelivery();
+					break;
+				}
+			case 2:
+                {
+					Console.WriteLine("Доступны следующие точки:");
+					foreach (Address adr in Mypickpoints.addresses)
+						Console.WriteLine(adr.Show());
+					Console.WriteLine("Выберете по номеру (от 1 до {0})", Mypickpoints.addresses.Length);
+					key = key.GetNumber(1, Mypickpoints.addresses.Length);
+					order.Delivery = new PickPointDelivery(Mypickpoints[key - 1]);
+					break;
+						}
+			case 3:
+				{ order.Delivery = new HomeDelivery(buyer.Address);
+					break;
+				}
+			default: 
+				{
+					order.Delivery = new ShopDelivery();
+					break;
+				}
+        }
+		
+		
 
 		Console.ForegroundColor = ConsoleColor.DarkYellow;
         Console.WriteLine("ваш заказ: ");
         ShowList(order.Cart);
         Console.BackgroundColor = ConsoleColor.DarkBlue;
-        Console.Write("Всего выбрано товаров: {0},  на сумму: {1:f} руб.", Count(order.Cart), TotalSum(order.Cart));
+        Console.Write("Всего выбрано товаров: {0} на сумму: {1:f} руб.", Count(order.Cart), TotalSum(order.Cart));
         Console.ResetColor();
         Console.WriteLine();
 		Console.ForegroundColor = ConsoleColor.DarkYellow;
